@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/.schema/devbox.schema.json",
+  "packages": [
+    "bun@latest",
+    "turbo@latest",
+    "nodejs@latest",
+    "infisical@latest"
+  ],
+  "shell": {
+    "init_hook": ["echo 'Welcome to Feedbacker devbox!' > /dev/null"],
+    "scripts": {
+      "test": ["echo \"Error: no test specified\" && exit 1"]
+    }
+  }
+}
