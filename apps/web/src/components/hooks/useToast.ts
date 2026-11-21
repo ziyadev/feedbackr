@@ -3,7 +3,15 @@
 'use client';
 
 import React from 'react';
-import { ToastActionElement, ToastProps } from '../ui/Toast';
+
+// The Toast UI now wraps sonner and no longer exports these types.
+type ToastProps = {
+  variant?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  [key: string]: unknown;
+};
+type ToastActionElement = React.ReactElement;
 
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 1000000;
