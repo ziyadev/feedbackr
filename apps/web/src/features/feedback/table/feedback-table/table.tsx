@@ -11,7 +11,7 @@ export default function FeedbackTable() {
   return (
     <div className="space-y-3 ">
       <Filterbar />
-      <DataTable data={data?.getFeedbacks.nodes} columns={columns} />
+      <DataTable data={data?.getFeedbacks.nodes ?? []} columns={columns} />
       <DataTablePagination pageSize={20} />
     </div>
   );

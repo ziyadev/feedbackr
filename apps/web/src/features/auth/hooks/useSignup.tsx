@@ -1,10 +1,6 @@
-import { ApolloError, useMutation } from '@apollo/client';
-import { CREDENTIALS_SIGN_UP } from '../api/mutations';
+import { ApolloError } from '@apollo/client';
 
-export const useSignup = ({
-  onError,
-  onSuccess,
-}: {
+export const useSignup = (_options: {
   onSuccess?: () => void;
   onError?: (e: ApolloError) => void;
 }) => {

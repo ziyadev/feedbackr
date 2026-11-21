@@ -13,7 +13,9 @@ export const getUrlFromString = (str: string) => {
     if (str.includes('.') && !str.includes(' ')) {
       return new URL(`https://${str}`).toString();
     }
-  } catch (_) {}
+  } catch (_) {
+    // not a valid URL even with https://, return the original string
+  }
   return str;
 };
 
@@ -23,13 +25,15 @@ export const getUrlFromStringIfValid = (str: string) => {
     if (str.includes('.') && !str.includes(' ')) {
       return new URL(`https://${str}`).toString();
     }
-  } catch (_) {}
+  } catch (_) {
+    // not a valid URL even with https://, return null
+  }
   return null;
 };
 
 export const getSearchParams = (url: string) => {
   // Create a params object
-  let params = {} as Record<string, string>;
+  const params = {} as Record<string, string>;
 
   new URL(url).searchParams.forEach(function (val, key) {
     params[key] = val;
@@ -39,12 +43,16 @@ export const getSearchParams = (url: string) => {
 };
 
 export const getSearchParamsWithArray = (url: string) => {
-  let params = {} as Record<string, string | string[]>;
+  const params = {} as Record<string, string | string[]>;
 
   new URL(url).searchParams.forEach(function (val, key) {
     if (key in params) {
       const param = params[key];
-      Array.isArray(param) ? param.push(val) : (params[key] = [param, val]);
+      if (Array.isArray(param)) {
+        param.push(val);
+      } else {
+        params[key] = [param, val];
+      }
     } else {
       params[key] = val;
     }
