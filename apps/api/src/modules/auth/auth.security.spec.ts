@@ -6,6 +6,8 @@ import { StorageResolver } from '../storage/storage.resolver';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { AuthProvider } from './interface/auth.interface';
+import { SessionStrategy } from './strategies/session.strategy';
+import { purgeLeakedSessions } from '../../common/config/redis-store.config';
 import { WorkspaceStrategy } from './strategies/workspace.strategy';
 import { passwordHash } from './utils/password-hash';
 
@@ -14,6 +16,13 @@ jest.mock(
   () => ({ normalizeString: (s: string) => s.trim().toLowerCase() }),
   { virtual: true }
 );
+jest.mock('../../common/config/redis-store.config', () => {
+  const actual = jest.requireActual('../../common/config/redis-store.config');
+  return { ...actual, redisStore: {} };
+});
+jest.mock('../../common/config/redis-client.config', () => ({
+  redisClient: {},
+}));
 jest.mock('../../common/config/csrf.config', () => ({
   validateRequest: () => true,
 }));
@@ -70,6 +79,7 @@ const makeService = (user: any, cache: any = {}) => {
   const userService = {
     findByEmail: jest.fn().mockResolvedValue(user),
     findByAccountProviderId: jest.fn().mockResolvedValue(null),
+    linkAccount: jest.fn().mockResolvedValue(undefined),
   };
   const cacheManager = {
     get: jest.fn(async (k) => store.get(k)),
@@ -94,6 +104,7 @@ describe('AuthService', () => {
     name: 'n',
     email: 'a@b.c',
     avatar_url: '',
+    emailVerified: true,
   };
 
   it('refuses OAuth login into an existing unverified-email account', async () => {
@@ -105,6 +116,32 @@ describe('AuthService', () => {
     await expect(svc.handleOAuthCallback(oauth)).rejects.toBeInstanceOf(
       UnauthorizedException
     );
+  });
+
+  it('refuses OAuth email-match login when the provider did not verify the email', async () => {
+    const { svc, userService } = makeService({
+      id: 'u',
+      email: 'a@b.c',
+      emailVerified: true,
+    });
+    await expect(
+      svc.handleOAuthCallback({ ...oauth, emailVerified: false })
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(userService.linkAccount).not.toHaveBeenCalled();
+  });
+
+  it('links an account on a verified email match', async () => {
+    const { svc, userService } = makeService({
+      id: 'u',
+      email: 'a@b.c',
+      emailVerified: true,
+    });
+    await svc.handleOAuthCallback(oauth);
+    expect(userService.linkAccount).toHaveBeenCalledWith({
+      userId: 'u',
+      provider: 'google',
+      providerAccountId: 'p1',
+    });
   });
 
   it('saveSession regenerates the session and stores no password hash', async () => {
@@ -172,5 +209,55 @@ describe('AuthController OAuth callback', () => {
     };
     await c.googleCallback(req, res, {} as any).catch(() => undefined);
     expect(saveSession).toHaveBeenCalled();
+  });
+});
+
+describe('legacy sessions holding hashedPassword', () => {
+  it('SessionStrategy rejects and destroys them', async () => {
+    const destroy = jest.fn((cb) => cb?.());
+    const req = {
+      session: { user: { id: 'u', hashedPassword: 'x' }, destroy },
+    };
+    await expect(
+      new SessionStrategy().canActivate(ctx(req, null, null))
+    ).resolves.toBe(false);
+    expect(destroy).toHaveBeenCalled();
+  });
+
+  it('/auth/session returns only whitelisted user fields', () => {
+    const c = new AuthController({} as any);
+    const out = c.session({
+      user: {
+        id: 'u',
+        email: 'e',
+        emailVerified: true,
+        planId: '',
+        hashedPassword: 'x',
+        rules: [],
+      },
+    } as any);
+    expect(out.session.user).toEqual({
+      id: 'u',
+      email: 'e',
+      emailVerified: true,
+      planId: '',
+    });
+  });
+
+  it('purgeLeakedSessions deletes only sessions containing a hash', async () => {
+    const store: Record<string, string> = {
+      'session:a': JSON.stringify({ user: { hashedPassword: 'x' } }),
+      'session:b': JSON.stringify({ user: { id: 'u' } }),
+    };
+    const client: any = {
+      scanIterator: async function* () {
+        yield* Object.keys(store);
+      },
+      get: async (k: string) => store[k],
+      del: jest.fn(),
+    };
+    await purgeLeakedSessions(client);
+    expect(client.del).toHaveBeenCalledTimes(1);
+    expect(client.del).toHaveBeenCalledWith('session:a');
   });
 });

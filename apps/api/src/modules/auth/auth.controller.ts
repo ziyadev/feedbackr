@@ -17,7 +17,15 @@ export class AuthController {
   @Get('session')
   session(@Session() session: SessionData) {
     return {
-      session: { user: session.user, workspace: session.workspace },
+      session: {
+        user: session.user && {
+          id: session.user.id,
+          email: session.user.email,
+          emailVerified: session.user.emailVerified,
+          planId: session.user.planId,
+        },
+        workspace: session.workspace,
+      },
     };
   }
   @UseGuards(GoogleOAuthGuard)

@@ -29,9 +29,16 @@ export class GithubStrategy extends PassportStrategy(Strategy) {
     profile: Profile,
     done: <T>(...args: T[]) => void
   ) {
+    const emails = (profile.emails ?? []) as {
+      value: string;
+      primary?: boolean;
+      verified?: boolean;
+    }[];
+    const email = emails.find((e) => e.primary) ?? emails[0];
     const user = await this.authService.handleOAuthCallback({
       name: profile.username,
-      email: profile.emails[0].value,
+      email: email.value,
+      emailVerified: email.verified === true,
       avatar_url: profile.photos[0].value,
       provider: AuthProvider.GITHUB,
       providerAccountId: profile.id,

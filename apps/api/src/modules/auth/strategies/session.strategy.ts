@@ -8,6 +8,14 @@ export class SessionStrategy extends AuthStrategy {
   }
   async canActivate(context: ExecutionContext) {
     const request = this.getRequest(context);
-    return !!request.session.user;
+    const user = request.session.user;
+    // sessions created before the hash leak fix may still hold hashedPassword
+    if (user && 'hashedPassword' in user) {
+      await new Promise<void>((resolve) =>
+        request.session.destroy(() => resolve())
+      );
+      return false;
+    }
+    return !!user;
   }
 }

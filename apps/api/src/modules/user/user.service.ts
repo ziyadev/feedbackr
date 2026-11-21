@@ -9,6 +9,7 @@ import { UserRepository } from '../database/repositories/user.repository';
 import { AccountBuilder } from './builders/account.builder';
 import { CreateUserProfileErrorBuilder } from './builders/create-user-profile-error.builder';
 import { UserBuilder } from './builders/user.builder';
+import { CreateAccountDto } from './dto/create-account.dto';
 import { CreateUserProfileDto } from './dto/create-user-profile.dto';
 import { CreateUserWithAccountDto } from './dto/create-user-with-account.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -53,6 +54,9 @@ export class UserService {
     return this.findById({
       id: account.userId,
     });
+  }
+  async linkAccount(dto: CreateAccountDto): Promise<void> {
+    await this.accountService.create(dto);
   }
   async create(userDto: CreateUserDto): Promise<UserEntity> {
     const user = new UserBuilder()

@@ -75,7 +75,7 @@ export class AuthService {
         avatar: dto.avatar_url,
         provider: dto.provider,
         providerAccountId: dto.providerAccountId,
-        emailVerified: true,
+        emailVerified: dto.emailVerified,
       });
       return {
         ...newUser,
@@ -83,10 +83,16 @@ export class AuthService {
         provider: dto.provider,
       };
     }
-    // never sign in to a pre-existing account whose email was not verified
-    if (!user.emailVerified) {
+    // never sign in to a pre-existing account unless both the local account
+    // and the provider have verified the email
+    if (!user.emailVerified || !dto.emailVerified) {
       throw new UnauthorizedException('Email is not verified');
     }
+    await this.userService.linkAccount({
+      userId: user.id,
+      provider: dto.provider,
+      providerAccountId: dto.providerAccountId,
+    });
     return {
       ...user,
       isNew: false,
