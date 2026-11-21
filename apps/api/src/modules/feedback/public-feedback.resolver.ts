@@ -8,6 +8,7 @@ import { CreateFeedbackDto } from './dto/create-feedback.dto';
 export class PublicFeedbackResolver {
   constructor(private readonly feedbackService: FeedbackService) {}
 
+  // Lets anonymous visitors submit the public feedback form for a given workspace.
   @Mutation(() => FeedbackModel)
   createFeedback(@Args('input') input: CreateFeedbackDto) {
     return this.feedbackService.handleCreateFeedback(input);
