@@ -2,6 +2,7 @@ export default {
   displayName: 'api',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
+  roots: ['<rootDir>/src'],
   transform: {
     '^.+\\.ts$': [
       'ts-jest',
