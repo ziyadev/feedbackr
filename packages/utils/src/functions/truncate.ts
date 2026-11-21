@@ -1,3 +1,4 @@
+/** Truncates text; the result never exceeds `length`. */
 export const truncate = (
   str: string | null | undefined,
   length: number
