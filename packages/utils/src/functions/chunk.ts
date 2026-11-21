@@ -1,3 +1,4 @@
+/** Splits an array into chunks of `chunk_size`; throws RangeError when chunk_size < 1. */
 export const chunk = <T>(array: T[], chunk_size: number): T[][] => {
   if (!(chunk_size >= 1)) {
     throw new RangeError(
