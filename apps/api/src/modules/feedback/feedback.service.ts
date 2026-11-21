@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { FeedbackRepository } from '../database/repositories/feedback.repository';
-import { PaginatedFeedbackModel } from './models/feedback.model';
+import { FeedbackModel, PaginatedFeedbackModel } from './models/feedback.model';
+import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import {
   FeedbackPaginationDto,
   GetAllFeedbacksFilterDto,
@@ -45,5 +46,22 @@ export class FeedbackService {
       totalCount,
       FeedbackMapper.toModel
     );
+  }
+
+  async handleCreateFeedback(input: CreateFeedbackDto): Promise<FeedbackModel> {
+    const { workspaceId, comment, rating, type, pageUrl, country } = input;
+    const feedback = await this.feedbackRepository.create({
+      data: {
+        workspaceId,
+        comment,
+        rating,
+        type,
+        pageUrl,
+        country: country || 'unknown',
+        metadata: JSON.stringify({}),
+        userMetadata: JSON.stringify({}),
+      },
+    });
+    return FeedbackMapper.toModel(feedback);
   }
 }
