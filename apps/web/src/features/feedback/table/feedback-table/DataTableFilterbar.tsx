@@ -30,7 +30,7 @@ export function Filterbar({ className, ...props }: ComponentProps<'div'>) {
     >
       <div className="flex flex-auto items-start gap-2 lg:items-center max-sm:flex-col">
         <div>
-          <Select value={status} onValueChange={(v) => setStatus(v)}>
+          <Select value={status ?? undefined} onValueChange={(v) => setStatus(v)}>
             <SelectTrigger>
               <SelectValue placeholder="All types" />
             </SelectTrigger>
@@ -46,12 +46,12 @@ export function Filterbar({ className, ...props }: ComponentProps<'div'>) {
 
         <Searchbar
           placeholder="Search for an exact feedback ID... "
-          value={feedbackId}
+          value={feedbackId ?? ""}
           onChange={(e) => setFeedbackId(e.target.value)}
         />
         <Searchbar
           placeholder="Search for an exact user ID... "
-          value={userId}
+          value={userId ?? ""}
           onChange={(e) => setUserId(e.target.value)}
         />
       </div>

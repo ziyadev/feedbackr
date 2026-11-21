@@ -114,7 +114,7 @@ export const EmailSection = () => {
     },
   });
   const [signup, { loading }] = useMutation(CREDENTIALS_SIGN_UP, {
-    onCompleted: ({ credentialsSignUp: { user, errors } }) => {
+    onCompleted: ({ credentialsSignUp: { errors } }) => {
       if (!errors) {
         // check if there are no errors
         setValue('credentials');

@@ -206,7 +206,7 @@ export const columns = [
       className: 'tabular-nums',
       displayName: 'Updated at',
     },
-    cell: ({ cell }) => <span>{timeAgo(cell.getValue(), { withAgo: true })}</span>,
+    cell: ({ cell }) => <span>{timeAgo(cell.getValue() as Date, { withAgo: true })}</span>,
   }),
   columnHelper.accessor('createdAt', {
     header: ({ column }) => (
@@ -217,7 +217,7 @@ export const columns = [
       className: 'tabular-nums',
       displayName: 'Created at',
     },
-    cell: ({ cell }) => <span>{new Date(cell.getValue()).toLocaleDateString('en-us', { weekday: "short", year: "numeric", month: "numeric", day: "numeric" })
+    cell: ({ cell }) => <span>{new Date(cell.getValue() as string).toLocaleDateString('en-us', { weekday: "short", year: "numeric", month: "numeric", day: "numeric" })
     }</span>,
 
   }),

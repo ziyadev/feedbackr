@@ -1,3 +1,5 @@
+import { Suspense } from 'react';
+
 export default function AuthLayout({
   children,
 }: {
@@ -5,7 +7,7 @@ export default function AuthLayout({
 }) {
   return (
     <div className="flex min-h-dvh items-center justify-center p-4 sm:p-6">
-      {children}
+      <Suspense>{children}</Suspense>
     </div>
   );
 }

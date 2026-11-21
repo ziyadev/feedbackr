@@ -1,12 +1,15 @@
 import type { NextConfig } from 'next';
 
+const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001';
+
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Linting is run separately via the `lint` Nx target in CI.
+  eslint: { ignoreDuringBuilds: true },
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL!}/:path*`,
+        destination: `${apiUrl}/:path*`,
       },
     ];
   },
