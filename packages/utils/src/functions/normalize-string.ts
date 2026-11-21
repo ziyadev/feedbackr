@@ -7,11 +7,13 @@ export const normalizeString = (key: string) => {
     .replace(/^\uFEFF/, '')
     .replace(/^\uFFFE/, '')
     .replace(/^\uEFBBBF/, '')
+    // eslint-disable-next-line no-control-regex
     .replace(/^\u0000\uFEFF/, '')
     .replace(/^\uFFFE0000/, '')
     .replace(/^\u2028/, '')
     .replace(/^\u2029/, '')
     // Remove any non-printable characters
+    // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
     // Normalize whitespace
     .replace(/\s+/g, ' ')
