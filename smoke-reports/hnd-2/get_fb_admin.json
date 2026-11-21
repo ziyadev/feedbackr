@@ -1,0 +1,3 @@
+{"data":{"getFeedbacks":{"totalCount":1,"hasNextPage":false,"nodes":[{"id":"cmwqgvo020009qjbvqinol82t","comment":"Unauth path: checkout CTA unclear on mobile.","rating":5,"type":"FEATURE","pageUrl":"https://app.example.com/checkout","country":"GB","priority":"LOW","status":"OPEN","metadata":[],"userMetadata":[],"createdAt":"2026-11-21T13:51:56.739Z"}]}}}
+
+HTTP:200

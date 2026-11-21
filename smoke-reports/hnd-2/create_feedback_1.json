@@ -1,0 +1,3 @@
+{"data":{"createFeedback":{"id":"cmwqguk1e0001qjbvuf5bp9u0","comment":"Smoke test: button on pricing page felt slow and confusing.","rating":4,"type":"BUG","pageUrl":"https://example.com/pricing","country":"US","priority":"LOW","status":"OPEN","metadata":[],"userMetadata":[],"createdAt":"2026-11-21T13:51:04.946Z","updatedAt":"2026-11-21T13:51:04.946Z"}}}
+
+HTTP_STATUS:200

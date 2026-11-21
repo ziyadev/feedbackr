@@ -1,0 +1,3 @@
+{"errors":[{"message":"Forbidden resource","locations":[{"line":1,"column":9}],"path":["getFeedbacks"],"extensions":{"code":"FORBIDDEN","stacktrace":["ForbiddenException: Forbidden resource","    at canActivateFn (/home/agent/work/node_modules/@nestjs/core/helpers/external-context-creator.js:157:23)","    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)","    at async target (/home/agent/work/node_modules/@nestjs/core/helpers/external-context-creator.js:73:31)","    at async Object.getFeedbacks (/home/agent/work/node_modules/@nestjs/core/helpers/external-proxy.js:9:24)"],"originalError":{"message":"Forbidden resource","error":"Forbidden","statusCode":403}}}],"data":null}
+
+HTTP:200
