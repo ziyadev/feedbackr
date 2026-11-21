@@ -11,7 +11,10 @@ export class WorkspaceStrategy extends AuthStrategy {
     const request = this.getRequest(context);
     const workspace = request.session.workspace;
     if (workspace) {
-      const roles = this.reflector.get('roles', context.getClass());
+      const roles = this.reflector.getAllAndOverride('roles', [
+        context.getHandler(),
+        context.getClass(),
+      ]);
       // if there is no roles set we skip the check
       if (!Array.isArray(roles)) return true;
       return roles.includes(request.session.workspace.role); // workspace role is in the roles array

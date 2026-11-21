@@ -11,8 +11,6 @@ import { validateRequest } from '../config/csrf.config';
 export class CsrfGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = getRequest(context);
-    console.log(request.cookies);
-    console.log(request.headers);
     if (!validateRequest(request)) {
       throw new ForbiddenException('Invalid CSRF token');
     }

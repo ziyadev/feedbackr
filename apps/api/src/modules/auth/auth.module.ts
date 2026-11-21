@@ -1,7 +1,15 @@
+import { redisClient } from '@/common/config/redis-client.config';
+import { purgeLeakedSessions } from '@/common/config/redis-store.config';
 import { Env } from '@/common/config/env';
 import { TokenModule } from '@/modules/token/token.module';
 import { CacheModule } from '@nestjs/cache-manager';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  Logger,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
@@ -44,7 +52,11 @@ import { WorkspaceStrategy } from './strategies/workspace.strategy';
   ],
   exports: [SessionStrategy, WorkspaceStrategy],
 })
-export class AuthModule implements NestModule {
+export class AuthModule implements NestModule, OnModuleInit {
+  onModuleInit() {
+    purgeLeakedSessions(redisClient).catch((e) => Logger.error(e));
+  }
+
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(OauthMiddleware).forRoutes('auth/google', 'auth/github');
   }

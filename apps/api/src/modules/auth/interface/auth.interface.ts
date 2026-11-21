@@ -9,4 +9,6 @@ export interface OAuthUser {
   name: string;
   email: string;
   avatar_url: string;
+  /** whether the provider verified this email address */
+  emailVerified: boolean;
 }

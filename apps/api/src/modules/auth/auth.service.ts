@@ -6,11 +6,13 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { normalizeString } from '@repo/utils';
 import { Cache } from 'cache-manager';
-import { SessionData } from 'express-session';
+import { Request } from 'express';
+import { Session, SessionData } from 'express-session';
 import { EmailService } from '../email/email.service';
 import { TokenService } from '../token/token.service';
 import { UserBuilder } from '../user/builders/user.builder';
@@ -18,6 +20,8 @@ import { UserEntity } from '../user/entities/user.entity';
 import { UserMapper } from '../user/mappers/user.mapper';
 import { UserService } from '../user/user.service';
 import {
+  MAX_LOGIN_ATTEMPTS,
+  MAX_LOGIN_ATTEMPTS_TIME,
   MAX_RESET_PASSWORD_ATTEMPTS,
   MAX_RESET_PASSWORD_ATTEMPTS_TIME,
 } from './auth.constant';
@@ -53,11 +57,21 @@ export class AuthService {
     }
   > {
     const normalizedEmail = normalizeString(dto.email);
+    const linked = await this.userService.findByAccountProviderId({
+      providerAccountId: dto.providerAccountId,
+    });
+    if (linked) {
+      return { ...linked, isNew: false, provider: dto.provider };
+    }
     // Check if user exists
     const user = await this.userService.findByEmail({
       email: normalizedEmail,
     });
     if (!user) {
+      // never create an account from an email the provider did not verify
+      if (!dto.emailVerified) {
+        throw new UnauthorizedException('Email is not verified');
+      }
       // Create a new user if not found
       const newUser = await this.userService.createWithProvider({
         email: dto.email,
@@ -73,6 +87,16 @@ export class AuthService {
         provider: dto.provider,
       };
     }
+    // never sign in to a pre-existing account unless both the local account
+    // and the provider have verified the email
+    if (!user.emailVerified || !dto.emailVerified) {
+      throw new UnauthorizedException('Email is not verified');
+    }
+    await this.userService.linkAccount({
+      userId: user.id,
+      provider: dto.provider,
+      providerAccountId: dto.providerAccountId,
+    });
     return {
       ...user,
       isNew: false,
@@ -106,10 +130,20 @@ export class AuthService {
         errors: errors.build(),
       });
     };
+    const attemptsKey = `login-attempts:${normalizedEmail}`;
+    const attempts = (await this.cacheManager.get<number>(attemptsKey)) ?? 0;
+    if (attempts >= MAX_LOGIN_ATTEMPTS) {
+      return handleInvalidCredentials();
+    }
     const user = await this.userService.findByEmail({ email: normalizedEmail });
 
     /* if user not found or no password */
     if (!user?.hashedPassword) {
+      await this.cacheManager.set(
+        attemptsKey,
+        attempts + 1,
+        MAX_LOGIN_ATTEMPTS_TIME
+      );
       return handleInvalidCredentials();
     }
 
@@ -120,19 +154,16 @@ export class AuthService {
 
     /* if password not valid */
     if (!isPasswordValid) {
+      await this.cacheManager.set(
+        attemptsKey,
+        attempts + 1,
+        MAX_LOGIN_ATTEMPTS_TIME
+      );
       return handleInvalidCredentials();
     }
+    await this.cacheManager.del(attemptsKey);
 
-    const sessionData = {
-      id: user.id,
-      email: user.email,
-      emailVerified: user.emailVerified,
-      rules: [],
-      permissions: [],
-      planId: '',
-    };
-
-    this.saveSession(session, sessionData);
+    await this.saveSession(session, user);
     return MutateResultFactory.ok({
       user: UserMapper.toModel(user),
     });
@@ -171,16 +202,8 @@ export class AuthService {
         .setPassword(hashedPassword)
         .build();
 
-      const sessionData = {
-        id: user.id,
-        email: user.email,
-        emailVerified: user.emailVerified,
-        rules: [],
-        permissions: [],
-        planId: '',
-      };
-      this.saveSession(session, sessionData);
       const newUser = await this.userService.create(user);
+      await this.saveSession(session, newUser);
       return MutateResultFactory.ok({
         user: UserMapper.toModel(newUser),
       });
@@ -264,8 +287,18 @@ export class AuthService {
     });
     return true;
   }
-  saveSession(session: SessionData, user: SessionData['user']) {
-    session.user = {
+  /* regenerate the session id on login (prevents session fixation) and
+   * store only whitelisted fields, never the password hash */
+  async saveSession(
+    session: SessionData,
+    user: { id: string; email: string; emailVerified: boolean }
+  ) {
+    const s = session as unknown as Session & { req: Request };
+    const req = s.req;
+    await new Promise<void>((resolve, reject) =>
+      s.regenerate((err) => (err ? reject(err) : resolve()))
+    );
+    req.session.user = {
       id: user.id,
       email: user.email,
       emailVerified: user.emailVerified,

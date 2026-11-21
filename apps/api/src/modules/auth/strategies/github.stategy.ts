@@ -20,6 +20,8 @@ export class GithubStrategy extends PassportStrategy(Strategy) {
         'PUBLIC_BASE_APP_URL'
       )}/auth/github/callback`,
       scope: ['user'],
+      // needed so profile.emails carries the `verified`/`primary` flags
+      allRawEmails: true,
     } satisfies StrategyOption);
   }
 
@@ -29,9 +31,16 @@ export class GithubStrategy extends PassportStrategy(Strategy) {
     profile: Profile,
     done: <T>(...args: T[]) => void
   ) {
+    const emails = (profile.emails ?? []) as {
+      value: string;
+      primary?: boolean;
+      verified?: boolean;
+    }[];
+    const email = emails.find((e) => e.primary) ?? emails[0];
     const user = await this.authService.handleOAuthCallback({
       name: profile.username,
-      email: profile.emails[0].value,
+      email: email.value,
+      emailVerified: email.verified === true,
       avatar_url: profile.photos[0].value,
       provider: AuthProvider.GITHUB,
       providerAccountId: profile.id,
