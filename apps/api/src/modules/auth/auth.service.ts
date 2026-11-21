@@ -68,6 +68,10 @@ export class AuthService {
       email: normalizedEmail,
     });
     if (!user) {
+      // never create an account from an email the provider did not verify
+      if (!dto.emailVerified) {
+        throw new UnauthorizedException('Email is not verified');
+      }
       // Create a new user if not found
       const newUser = await this.userService.createWithProvider({
         email: dto.email,
@@ -75,7 +79,7 @@ export class AuthService {
         avatar: dto.avatar_url,
         provider: dto.provider,
         providerAccountId: dto.providerAccountId,
-        emailVerified: dto.emailVerified,
+        emailVerified: true,
       });
       return {
         ...newUser,

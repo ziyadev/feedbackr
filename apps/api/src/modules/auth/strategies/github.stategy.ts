@@ -20,6 +20,8 @@ export class GithubStrategy extends PassportStrategy(Strategy) {
         'PUBLIC_BASE_APP_URL'
       )}/auth/github/callback`,
       scope: ['user'],
+      // needed so profile.emails carries the `verified`/`primary` flags
+      allRawEmails: true,
     } satisfies StrategyOption);
   }
 

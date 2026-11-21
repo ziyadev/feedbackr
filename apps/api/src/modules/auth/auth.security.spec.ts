@@ -130,6 +130,15 @@ describe('AuthService', () => {
     expect(userService.linkAccount).not.toHaveBeenCalled();
   });
 
+  it('refuses to create a new user when the provider did not verify the email', async () => {
+    const { svc, userService } = makeService(null);
+    userService.createWithProvider = jest.fn();
+    await expect(
+      svc.handleOAuthCallback({ ...oauth, emailVerified: false })
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(userService.createWithProvider).not.toHaveBeenCalled();
+  });
+
   it('links an account on a verified email match', async () => {
     const { svc, userService } = makeService({
       id: 'u',
