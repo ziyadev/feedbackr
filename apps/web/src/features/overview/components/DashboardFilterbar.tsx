@@ -60,7 +60,7 @@ export const getPeriod = (
   const from = dateRange.from;
   const to = dateRange.to;
   switch (value) {
-    case 'previous-period':
+    case 'previous-period': {
       let previousPeriodFrom;
       let previousPeriodTo;
       if (from && to) {
@@ -70,7 +70,8 @@ export const getPeriod = (
         previousPeriodFrom = subDays(previousPeriodTo, numberOfDaysBetween);
       }
       return { from: previousPeriodFrom, to: previousPeriodTo };
-    case 'last-year':
+    }
+    case 'last-year': {
       let lastYearFrom;
       let lastYearTo;
       if (from) {
@@ -80,6 +81,7 @@ export const getPeriod = (
         lastYearTo = subYears(to, 1);
       }
       return { from: lastYearFrom, to: lastYearTo };
+    }
     case 'no-comparison':
       return undefined;
   }
