@@ -1,4 +1,4 @@
-import { getSession } from '@/lib/auth';
+import { getRequestSession } from '@/lib/auth';
 import { NextFetchEvent, NextRequest, NextResponse } from 'next/server';
 import { MiddlewareFactory } from './stackHandler';
 
@@ -8,7 +8,7 @@ const protectedPaths = ['/dashboard'];
 export const withWorkspace: MiddlewareFactory = (next) => {
   return async (request: NextRequest, _next: NextFetchEvent) => {
     // Check if user is authenticated
-    const session = await getSession();
+    const session = await getRequestSession(request);
     if (!session?.workspace) {
       // Check if requested path matches any protected routes
       const hit = protectedPaths.some((path) =>
