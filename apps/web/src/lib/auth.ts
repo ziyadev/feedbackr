@@ -1,5 +1,6 @@
 import { WorkspaceMemberRole } from '@/graphql/types';
 import { cookies } from 'next/headers';
+import { memoizeByRequest } from './request-session';
 
 export const auth = async () => {
   return await getSession();
@@ -35,3 +36,7 @@ export const getSession = async (): Promise<null | {
       return null;
     });
 };
+
+// Fetch the session once per middleware request and share it across the stack.
+export const getRequestSession = (request: object) =>
+  memoizeByRequest(request, getSession);
