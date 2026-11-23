@@ -67,6 +67,7 @@ export class MicrosoftStrategy extends PassportStrategy(
         // Entra emails are not verified by Microsoft; only trust them when the
         // app is locked to a single tenant whose admin owns the addresses
         emailVerified: this.singleTenant && !!me.mail,
+        avatar_url: undefined, // Graph photo needs a separate binary call
         provider: AuthProvider.MICROSOFT,
         providerAccountId: me.id,
       });
