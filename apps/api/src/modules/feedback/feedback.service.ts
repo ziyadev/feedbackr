@@ -6,9 +6,16 @@ import {
   FeedbackPaginationDto,
   GetAllFeedbacksFilterDto,
   GetAllFeedbacksFilterOrderBy,
+  GetAllFeedbacksFilterOrderByKeys,
 } from './dto/get-all-feedbacks-filter.dto';
 import { CursorService } from '@/common/modules/cursor/cursor.service';
 import { FeedbackMapper } from './mapper/feedback.mapper';
+import { OrderByType } from '@/common/dto/enum-filter.dto';
+
+const DEFAULT_ORDER_BY: GetAllFeedbacksFilterOrderBy = {
+  key: GetAllFeedbacksFilterOrderByKeys.CREATED_AT,
+  type: OrderByType.DESC,
+};
 
 @Injectable()
 export class FeedbackService {
@@ -30,7 +37,7 @@ export class FeedbackService {
     };
     const { cursor } = pagination ?? {};
     const take = pagination?.take || 10;
-    const { key, type } = orderBy ?? { key: 'createdAt', type: 'desc' };
+    const { key, type } = orderBy ?? DEFAULT_ORDER_BY;
     const takePlusOne = take + 1;
     const list = await this.feedbackRepository.findMany({
       where,
