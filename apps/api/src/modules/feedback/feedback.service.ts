@@ -21,19 +21,22 @@ export class FeedbackService {
   async handleGetAllFeedbacks(
     workspaceId: string,
     filter: GetAllFeedbacksFilterDto,
-    { take, cursor }: FeedbackPaginationDto,
-    orderBy: GetAllFeedbacksFilterOrderBy
+    pagination: FeedbackPaginationDto | null,
+    orderBy: GetAllFeedbacksFilterOrderBy | null
   ): Promise<PaginatedFeedbackModel> {
     const where = {
       workspaceId,
       ...filter,
     };
-    const takePlusOne = (take || 10) + 1;
+    const { cursor } = pagination ?? {};
+    const take = pagination?.take || 10;
+    const { key, type } = orderBy ?? { key: 'createdAt', type: 'desc' };
+    const takePlusOne = take + 1;
     const list = await this.feedbackRepository.findMany({
       where,
       take: takePlusOne,
       orderBy: {
-        [orderBy.key]: orderBy.type,
+        [key]: type,
       },
       ...this.cursorService.createCursorObject(cursor),
     });
