@@ -6,9 +6,10 @@ import {
   randNumber,
 } from '@ngneat/falso';
 import { PrismaClient } from '@prisma/client';
+import { getSeedUserPassword } from '../../src/common/config/seed-env';
 import { passwordHash } from '../../src/modules/auth/utils/password-hash';
 export default async function userSeed(prisma: PrismaClient) {
-  const hashedPassword = await passwordHash('securePassowrd123.@');
+  const hashedPassword = await passwordHash(getSeedUserPassword());
   Array.from({ length: 1000 }).forEach(async () => {
     await createUser(hashedPassword, prisma);
   });
