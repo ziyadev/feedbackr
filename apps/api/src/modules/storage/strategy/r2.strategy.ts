@@ -14,16 +14,19 @@ export class R2Strategy implements IStorage {
   private readonly bucketName: string;
 
   constructor() {
+    const accessKeyId = process.env.R2_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+    if (!accessKeyId || !secretAccessKey) {
+      throw new Error(
+        'Missing R2 credentials: set R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY'
+      );
+    }
     this.r2 = new S3Client({
       region: 'auto',
 
       endpoint:
         'https://42da76e088f427474e48e7285d15667e.r2.cloudflarestorage.com',
-      credentials: {
-        accessKeyId: 'e0a377003c9f03cc3989178ed75ca958',
-        secretAccessKey:
-          '5d46283f1cf40f91c03adddea373af353053504e2c82d9d066b077b2c14f34ba',
-      },
+      credentials: { accessKeyId, secretAccessKey },
     });
     this.bucketName = 'fbtemp';
   }
