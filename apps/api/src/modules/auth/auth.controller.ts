@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { Auth } from './decorator/auth.decorator';
 import { GithubOAuthGuard } from './guard/github.guard';
 import { GoogleOAuthGuard } from './guard/google.guard';
+import { TwitterOAuthGuard } from './guard/twitter.guard';
 import { UserEntity } from '../user/entities/user.entity';
 import { buildOauthRedirectUrl } from './utils/build-oauth-redirect-url';
 
@@ -53,6 +54,23 @@ export class AuthController {
   @UseGuards(GithubOAuthGuard)
   @Get('github/callback')
   async githubCallback(
+    @Req() req: Request,
+    @Res() res: Response,
+    @Session() session
+  ) {
+    await this.authService.saveSession(session, req.user as UserEntity);
+    res.redirect(buildOauthRedirectUrl(req));
+  }
+
+  @UseGuards(TwitterOAuthGuard)
+  @Get('twitter')
+  twitter() {
+    return;
+  }
+
+  @UseGuards(TwitterOAuthGuard)
+  @Get('twitter/callback')
+  async twitterCallback(
     @Req() req: Request,
     @Res() res: Response,
     @Session() session

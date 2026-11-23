@@ -19,13 +19,15 @@ export class AccountService {
   }
 
   async findByPrviderId({
+    provider,
     providerAccountId,
   }: {
+    provider: string;
     providerAccountId: string;
   }): Promise<AccountEntity> {
     return await this.accountRepository.findUnique({
       where: {
-        providerAccountId,
+        provider_providerAccountId: { provider, providerAccountId },
       },
     });
   }
