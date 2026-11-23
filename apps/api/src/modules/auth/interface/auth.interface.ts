@@ -2,6 +2,7 @@ export enum AuthProvider {
   GOOGLE = 'google',
   GITHUB = 'github',
   TWITTER = 'twitter',
+  MICROSOFT = 'microsoft',
 }
 
 export interface OAuthUser {

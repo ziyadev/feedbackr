@@ -65,6 +65,25 @@ export default function SignInForm() {
               </svg>
             }
           />
+          <ProviderButton
+            providerName="microsoft"
+            label="Continue with Microsoft"
+            icon={
+              <svg
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+                width={24}
+                height={24}
+                aria-hidden="true"
+                className="size-5 mx-2 "
+              >
+                <path fill="#f25022" d="M1 1h10v10H1z" />
+                <path fill="#7fba00" d="M13 1h10v10H13z" />
+                <path fill="#00a4ef" d="M1 13h10v10H1z" />
+                <path fill="#ffb900" d="M13 13h10v10H13z" />
+              </svg>
+            }
+          />
         </div>
         <div className="mx-auto flex w-full items-center justify-between gap-3 text-sm text-gray-500 dark:text-gray-500 my-4">
           <div className="h-[1px] w-full bg-gray-200 dark:bg-gray-800" />
