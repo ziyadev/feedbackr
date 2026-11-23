@@ -43,11 +43,14 @@ export class UserService {
   }
 
   async findByAccountProviderId({
+    provider,
     providerAccountId,
   }: {
+    provider: string;
     providerAccountId: string;
   }): Promise<UserEntity> {
     const account = await this.accountService.findByPrviderId({
+      provider,
       providerAccountId,
     });
     if (!account) return null;

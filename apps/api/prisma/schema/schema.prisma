@@ -46,7 +46,7 @@ model Account {
   userId            String
   type              AccountType @default(OAUTH)
   provider          String
-  providerAccountId String      @unique
+  providerAccountId String
   expires_at        Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

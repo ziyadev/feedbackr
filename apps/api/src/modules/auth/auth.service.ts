@@ -56,13 +56,21 @@ export class AuthService {
       provider: AuthProvider;
     }
   > {
-    const normalizedEmail = normalizeString(dto.email);
     const linked = await this.userService.findByAccountProviderId({
+      provider: dto.provider,
       providerAccountId: dto.providerAccountId,
     });
     if (linked) {
       return { ...linked, isNew: false, provider: dto.provider };
     }
+    // some providers (e.g. Twitter) may not return an email; without one we
+    // can neither create nor safely link an account
+    if (!dto.email) {
+      throw new UnauthorizedException(
+        'No email address available from this provider'
+      );
+    }
+    const normalizedEmail = normalizeString(dto.email);
     // Check if user exists
     const user = await this.userService.findByEmail({
       email: normalizedEmail,
