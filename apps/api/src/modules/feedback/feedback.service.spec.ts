@@ -1,4 +1,88 @@
 import { FeedbackService } from './feedback.service';
+import { CursorService } from '@/common/modules/cursor/cursor.service';
+
+describe('FeedbackService.handleGetAllFeedbacks', () => {
+  const setup = (rowCount: number) => {
+    const rows = Array.from({ length: rowCount }, (_, i) => ({
+      id: `r${i}`,
+      workspaceId: 'w1',
+      metadata: '{}',
+      userMetadata: '{}',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
+    const findMany = jest.fn().mockResolvedValue(rows);
+    const count = jest.fn().mockResolvedValue(rowCount);
+    const service = new FeedbackService(
+      { findMany, count } as any,
+      new CursorService()
+    );
+    return { service, findMany };
+  };
+
+  it('works when pagination and orderBy are omitted', async () => {
+    const rows = Array.from({ length: 11 }, (_, i) => ({
+      id: `f${i}`,
+      workspaceId: 'w1',
+      metadata: '{}',
+      userMetadata: '{}',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
+    const findMany = jest.fn().mockResolvedValue(rows);
+    const count = jest.fn().mockResolvedValue(11);
+    const service = new FeedbackService(
+      { findMany, count } as any,
+      new CursorService()
+    );
+
+    const result = await service.handleGetAllFeedbacks(
+      'w1',
+      null as any,
+      null as any,
+      null as any
+    );
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ take: 11, orderBy: { createdAt: 'desc' } })
+    );
+    expect(result.nodes).toHaveLength(10);
+    expect(result.hasNextPage).toBe(true);
+  });
+
+  it('passes cursor through when orderBy is omitted', async () => {
+    const { service, findMany } = setup(3);
+
+    await service.handleGetAllFeedbacks(
+      'w1',
+      null as any,
+      { take: 5, cursor: 'f9' },
+      null as any
+    );
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        take: 6,
+        cursor: { id: 'f9' },
+        skip: 1,
+        orderBy: { createdAt: 'desc' },
+      })
+    );
+  });
+
+  it('does not let defaults override explicit take and orderBy', async () => {
+    const { service, findMany } = setup(3);
+
+    await service.handleGetAllFeedbacks('w1', null as any, { take: 2 }, {
+      key: 'rating',
+      type: 'asc',
+    } as any);
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ take: 3, orderBy: { rating: 'asc' } })
+    );
+  });
+});
 
 describe('FeedbackService.handleCreateFeedback', () => {
   it('creates a feedback via the repository and returns the mapped model', async () => {

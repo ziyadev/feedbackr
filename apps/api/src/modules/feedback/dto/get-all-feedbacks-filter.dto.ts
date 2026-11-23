@@ -47,7 +47,7 @@ export class GetAllFeedbacksFilterDto {
   @Field(() => DateTimeFilter, { nullable: true })
   updatedAt?: DateTimeFilter;
 }
-enum GetAllFeedbacksFilterOrderByKeys {
+export enum GetAllFeedbacksFilterOrderByKeys {
   ID = 'id',
   RATING = 'rating',
   TYPE = 'type',

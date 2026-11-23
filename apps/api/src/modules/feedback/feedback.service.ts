@@ -6,9 +6,16 @@ import {
   FeedbackPaginationDto,
   GetAllFeedbacksFilterDto,
   GetAllFeedbacksFilterOrderBy,
+  GetAllFeedbacksFilterOrderByKeys,
 } from './dto/get-all-feedbacks-filter.dto';
 import { CursorService } from '@/common/modules/cursor/cursor.service';
 import { FeedbackMapper } from './mapper/feedback.mapper';
+import { OrderByType } from '@/common/dto/enum-filter.dto';
+
+const DEFAULT_ORDER_BY: GetAllFeedbacksFilterOrderBy = {
+  key: GetAllFeedbacksFilterOrderByKeys.CREATED_AT,
+  type: OrderByType.DESC,
+};
 
 @Injectable()
 export class FeedbackService {
@@ -21,19 +28,22 @@ export class FeedbackService {
   async handleGetAllFeedbacks(
     workspaceId: string,
     filter: GetAllFeedbacksFilterDto,
-    { take, cursor }: FeedbackPaginationDto,
-    orderBy: GetAllFeedbacksFilterOrderBy
+    pagination: FeedbackPaginationDto | null,
+    orderBy: GetAllFeedbacksFilterOrderBy | null
   ): Promise<PaginatedFeedbackModel> {
     const where = {
       workspaceId,
       ...filter,
     };
-    const takePlusOne = (take || 10) + 1;
+    const { cursor } = pagination ?? {};
+    const take = pagination?.take || 10;
+    const { key, type } = orderBy ?? DEFAULT_ORDER_BY;
+    const takePlusOne = take + 1;
     const list = await this.feedbackRepository.findMany({
       where,
       take: takePlusOne,
       orderBy: {
-        [orderBy.key]: orderBy.type,
+        [key]: type,
       },
       ...this.cursorService.createCursorObject(cursor),
     });
