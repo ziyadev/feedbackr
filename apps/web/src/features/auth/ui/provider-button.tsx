@@ -9,7 +9,7 @@ export const ProviderButton = ({
   icon,
   label,
 }: {
-  providerName: 'google' | 'github';
+  providerName: 'google' | 'github' | 'twitter';
   icon: ReactNode;
   label: string;
 }) => {

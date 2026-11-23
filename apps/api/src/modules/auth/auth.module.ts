@@ -21,6 +21,7 @@ import { AuthService } from './auth.service';
 import { OauthMiddleware } from './middleware/oauth.middleware';
 import { GithubStrategy } from './strategies/github.stategy';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { TwitterStrategy } from './strategies/twitter.strategy';
 import { SessionStrategy } from './strategies/session.strategy';
 import { WorkspaceStrategy } from './strategies/workspace.strategy';
 
@@ -45,6 +46,7 @@ import { WorkspaceStrategy } from './strategies/workspace.strategy';
     AuthService,
     GoogleStrategy,
     GithubStrategy,
+    TwitterStrategy,
     HeaderAPIKeyStrategy,
     AuthResolver,
     SessionStrategy,
@@ -58,6 +60,8 @@ export class AuthModule implements NestModule, OnModuleInit {
   }
 
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(OauthMiddleware).forRoutes('auth/google', 'auth/github');
+    consumer
+      .apply(OauthMiddleware)
+      .forRoutes('auth/google', 'auth/github', 'auth/twitter');
   }
 }
