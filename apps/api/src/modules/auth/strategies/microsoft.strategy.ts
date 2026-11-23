@@ -45,7 +45,7 @@ export class MicrosoftStrategy extends PassportStrategy(
       scope: ['openid', 'profile', 'email', 'User.Read'],
       state: true,
     } satisfies StrategyOptions);
-    this.singleTenant = !MULTI_TENANT.includes(tenant);
+    this.singleTenant = !MULTI_TENANT.includes(tenant?.toLowerCase());
   }
 
   async validate(

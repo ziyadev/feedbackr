@@ -56,6 +56,15 @@ describe('MicrosoftStrategy', () => {
     );
   });
 
+  it('treats multi-tenant values case-insensitively', async () => {
+    mockGraph({ id: 'oid1', displayName: 'Me', mail: 'me@x.c' });
+    const { strategy, handleOAuthCallback } = make('Common');
+    await strategy.validate('a', 'r', {}, jest.fn());
+    expect(handleOAuthCallback).toHaveBeenCalledWith(
+      expect.objectContaining({ emailVerified: false })
+    );
+  });
+
   it('never falls back to the unverified userPrincipalName', async () => {
     mockGraph({ id: 'oid1', displayName: 'Me', userPrincipalName: 'u@x.c' });
     const { strategy, handleOAuthCallback } = make();
