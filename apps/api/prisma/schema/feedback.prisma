@@ -62,4 +62,5 @@ model Feedback {
     @@index([feedbackNoteId])
     @@index([assignedToId])
     @@index([workspaceId])
+    @@index([workspaceId, createdAt])
 }

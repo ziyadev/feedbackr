@@ -10,35 +10,47 @@ import {
 
 interface DataTablePaginationProps {
   pageSize: number;
+  onFirst?: () => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  hasPrevious?: boolean;
+  hasNext?: boolean;
 }
 
-export function DataTablePagination({ pageSize }: DataTablePaginationProps) {
+export function DataTablePagination({
+  pageSize,
+  onFirst,
+  onPrevious,
+  onNext,
+  hasPrevious,
+  hasNext,
+}: DataTablePaginationProps) {
   const paginationButtons = [
     {
       icon: RiArrowLeftDoubleLine,
-      onClick: () => true,
-      disabled: false,
+      onClick: () => onFirst?.(),
+      disabled: !hasPrevious,
       srText: 'First page',
       mobileView: 'hidden sm:block',
     },
     {
       icon: RiArrowLeftSLine,
-      onClick: () => true,
-      disabled: false,
+      onClick: () => onPrevious?.(),
+      disabled: !hasPrevious,
       srText: 'Previous page',
       mobileView: '',
     },
     {
       icon: RiArrowRightSLine,
-      onClick: () => true,
-      disabled: false,
+      onClick: () => onNext?.(),
+      disabled: !hasNext,
       srText: 'Next page',
       mobileView: '',
     },
     {
       icon: RiArrowRightDoubleLine,
       onClick: () => true,
-      disabled: false,
+      disabled: true,
       srText: 'Last page',
       mobileView: 'hidden sm:block',
     },

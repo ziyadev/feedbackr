@@ -42,16 +42,18 @@ export class CursorService {
       list.pop(); // Remove extra item fetched for `hasNextPage` check
     }
 
+    const nodes = list.map((item) => mapper(item));
+
     return {
       totalCount,
       hasNextPage,
       startCursor: this.createCursor(list[0]),
       endCursor: this.createCursor(list[list.length - 1]),
-      edges: list.map((item) => ({
+      edges: list.map((item, i) => ({
         cursor: this.createCursor(item),
-        node: mapper(item),
+        node: nodes[i],
       })),
-      nodes: list.map((item) => mapper(item)),
+      nodes,
     };
   }
 }

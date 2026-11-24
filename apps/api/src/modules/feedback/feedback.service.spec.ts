@@ -92,6 +92,28 @@ describe('FeedbackService.handleGetAllFeedbacks', () => {
   });
 });
 
+describe('FeedbackService.handleGetAllFeedbacks count', () => {
+  it('runs count concurrently with findMany', async () => {
+    let countCalled = false;
+    const findMany = jest.fn().mockImplementation(async () => {
+      await new Promise((r) => setImmediate(r));
+      if (!countCalled) throw new Error('count was not started in parallel');
+      return [{ id: 'r0', metadata: '{}', userMetadata: '{}' }];
+    });
+    const count = jest.fn().mockImplementation(async () => {
+      countCalled = true;
+      return 1;
+    });
+    const service = new FeedbackService(
+      { findMany, count } as any,
+      new CursorService(),
+      {} as any
+    );
+    const res = await service.handleGetAllFeedbacks('w1', {} as any, null, null);
+    expect(res.totalCount).toBe(1);
+  });
+});
+
 describe('FeedbackService.handleCreateFeedback', () => {
   it('creates a feedback via the repository and returns the mapped model', async () => {
     const now = new Date();

@@ -42,16 +42,17 @@ export class FeedbackService {
     const take = pagination?.take || 10;
     const { key, type } = orderBy ?? DEFAULT_ORDER_BY;
     const takePlusOne = take + 1;
-    const list = await this.feedbackRepository.findMany({
-      where,
-      take: takePlusOne,
-      orderBy: {
-        [key]: type,
-      },
-      ...this.cursorService.createCursorObject(cursor),
-    });
-    const totalCount =
-      list.length > 0 ? await this.feedbackRepository.count({ where }) : 0;
+    const [list, totalCount] = await Promise.all([
+      this.feedbackRepository.findMany({
+        where,
+        take: takePlusOne,
+        orderBy: {
+          [key]: type,
+        },
+        ...this.cursorService.createCursorObject(cursor),
+      }),
+      this.feedbackRepository.count({ where }),
+    ]);
 
     return this.cursorService.createPaginationResponse(
       list,
