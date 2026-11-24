@@ -35,4 +35,12 @@ describe('truncate', () => {
     expect(truncate('hello', 0)).toBe('');
     expect(truncate('hello', -1)).toBe('');
   });
+
+  it('does not split surrogate pairs', () => {
+    const lone = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])/;
+    for (let n = 0; n < 12; n++) {
+      expect(truncate('😀😀😀😀😀😀', n)).not.toMatch(lone);
+      expect(truncate('😀😀😀😀😀😀', n)?.length).toBeLessThanOrEqual(n);
+    }
+  });
 });

@@ -12,7 +12,7 @@ describe('smartTruncate', () => {
 
   it('truncates the path first and keeps the domain', () => {
     expect(smartTruncate('example.com/some/long/path/here', 25)).toBe(
-      'ex...com/some/long/pat...'
+      'example.com/some/long/...'
     );
   });
 
@@ -59,5 +59,16 @@ describe('smartTruncate', () => {
       const result = smartTruncate('example.com/😀😀😀😀😀😀😀😀', max);
       expect(result).not.toMatch(lone);
     }
+  });
+});
+
+describe('smartTruncate short domains', () => {
+  it('does not over-truncate a domain that nearly fits', () => {
+    expect(smartTruncate('example.com/some/long/path/here', 25)).toBe(
+      'example.com/some/long/...'
+    );
+    expect(smartTruncate('example.com/some/long/path/here', 20)).toBe(
+      'example.com/some/...'
+    );
   });
 });

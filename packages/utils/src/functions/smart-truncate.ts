@@ -1,24 +1,11 @@
 /* 
     smart truncation algorithm that dynamically adjusts based on the length of the domain and the path
     it gives priority to the path and truncates the domain if it's too long
-    at minimum the domain should still show 8 characters though
-    the result never exceeds maxLength and never splits a surrogate pair
+    at minimum the domain should still show 8 characters (before "...tld") though
+    the result never exceeds maxLength
 */
 
-// Slice without leaving a dangling high surrogate at the cut
-const safeSlice = (str: string, length: number): string => {
-  const end = Math.max(length, 0);
-  const cut = str.slice(0, end);
-  return /[\uD800-\uDBFF]$/.test(cut) && end < str.length
-    ? cut.slice(0, -1)
-    : cut;
-};
-
-const truncatePath = (path: string, maxLength: number): string => {
-  if (path.length <= maxLength) return path;
-  if (maxLength <= 3) return safeSlice(path, maxLength);
-  return `${safeSlice(path, maxLength - 3)}...`;
-};
+import { safeSlice, truncate } from './truncate';
 
 // Function to truncate domain while preserving TLD
 const truncateDomain = (domain: string, maxLength: number): string => {
@@ -39,12 +26,19 @@ export const smartTruncate = (link: string, maxLength: number): string => {
   const [domain, ...pathParts] = link.split('/');
   const path = pathParts.join('/');
   const minDomainLength = 8;
+  const tldLength = domain.length - domain.lastIndexOf('.') - 1;
 
-  // calculate max path length (reserving the domain and the "/" separator)
-  const maxPathLength = maxLength - minDomainLength - 1;
+  // reserve room for the domain (at most 8 chars + "...tld", or all of it if shorter)
+  const reservedDomain = Math.min(
+    domain.length,
+    minDomainLength + 3 + tldLength
+  );
+
+  // calculate max path length (minus the "/" separator)
+  const maxPathLength = maxLength - reservedDomain - 1;
 
   // Truncate path
-  const truncatedPath = truncatePath(path, maxPathLength);
+  const truncatedPath = truncate(path, maxPathLength)!;
 
   // Truncate domain if necessary, preserving TLD
   const truncatedDomain = truncateDomain(
