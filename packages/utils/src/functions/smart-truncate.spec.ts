@@ -12,7 +12,7 @@ describe('smartTruncate', () => {
 
   it('truncates the path first and keeps the domain', () => {
     expect(smartTruncate('example.com/some/long/path/here', 25)).toBe(
-      'example...com/some/long/path...'
+      'ex...com/some/long/pat...'
     );
   });
 
@@ -37,5 +37,27 @@ describe('smartTruncate', () => {
     expect(() =>
       smartTruncate('example.com/😀😀😀😀😀😀😀😀', 15)
     ).not.toThrow();
+  });
+
+  it('never returns more than maxLength characters', () => {
+    const links = [
+      'example.com/some/long/path/here',
+      'averyveryverylongsubdomain.example.com/p',
+      'example.com/path',
+    ];
+    for (const link of links) {
+      for (const max of [0, 1, 5, 8, 12, 20, 25]) {
+        expect(smartTruncate(link, max).length).toBeLessThanOrEqual(max);
+      }
+    }
+  });
+
+  it('does not split a surrogate pair when truncating emoji', () => {
+    const lone =
+      /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+    for (let max = 0; max < 30; max++) {
+      const result = smartTruncate('example.com/😀😀😀😀😀😀😀😀', max);
+      expect(result).not.toMatch(lone);
+    }
   });
 });
