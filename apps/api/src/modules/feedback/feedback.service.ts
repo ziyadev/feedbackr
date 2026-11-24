@@ -46,9 +46,8 @@ export class FeedbackService {
       this.feedbackRepository.findMany({
         where,
         take: takePlusOne,
-        orderBy: {
-          [key]: type,
-        },
+        // id tiebreaker keeps cursor pagination stable when sort keys tie
+        orderBy: [{ [key]: type }, { id: type }],
         ...this.cursorService.createCursorObject(cursor),
       }),
       this.feedbackRepository.count({ where }),

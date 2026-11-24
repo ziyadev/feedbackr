@@ -52,7 +52,10 @@ describe('FeedbackService.handleGetAllFeedbacks', () => {
     );
 
     expect(findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ take: 11, orderBy: { createdAt: 'desc' } })
+      expect.objectContaining({
+        take: 11,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      })
     );
     expect(result.nodes).toHaveLength(10);
     expect(result.hasNextPage).toBe(true);
@@ -73,7 +76,7 @@ describe('FeedbackService.handleGetAllFeedbacks', () => {
         take: 6,
         cursor: { id: 'f9' },
         skip: 1,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
       })
     );
   });
@@ -87,7 +90,10 @@ describe('FeedbackService.handleGetAllFeedbacks', () => {
     } as any);
 
     expect(findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ take: 3, orderBy: { rating: 'asc' } })
+      expect.objectContaining({
+        take: 3,
+        orderBy: [{ rating: 'asc' }, { id: 'asc' }],
+      })
     );
   });
 });
@@ -109,8 +115,57 @@ describe('FeedbackService.handleGetAllFeedbacks count', () => {
       new CursorService(),
       {} as any
     );
-    const res = await service.handleGetAllFeedbacks('w1', {} as any, null, null);
+    const res = await service.handleGetAllFeedbacks(
+      'w1',
+      {} as any,
+      null,
+      null
+    );
     expect(res.totalCount).toBe(1);
+  });
+});
+
+describe('FeedbackService.handleGetAllFeedbacks paging', () => {
+  const run = async (rowCount: number, take: number) => {
+    const rows = Array.from({ length: rowCount }, (_, i) => ({
+      id: `r${i}`,
+      metadata: '{}',
+      userMetadata: '{}',
+    }));
+    const findMany = jest.fn().mockResolvedValue(rows);
+    const service = new FeedbackService(
+      { findMany, count: jest.fn().mockResolvedValue(rowCount) } as any,
+      new CursorService(),
+      {} as any
+    );
+    const res = await service.handleGetAllFeedbacks(
+      'w1',
+      {} as any,
+      { take } as any,
+      null
+    );
+    return { res, findMany };
+  };
+
+  it('breaks createdAt ties with id', async () => {
+    const { findMany } = await run(1, 5);
+    expect(findMany.mock.calls[0][0].orderBy).toEqual([
+      { createdAt: 'desc' },
+      { id: 'desc' },
+    ]);
+  });
+
+  it('reports hasNextPage=false on the last page', async () => {
+    const { res } = await run(3, 5);
+    expect(res.hasNextPage).toBe(false);
+    expect(res.nodes).toHaveLength(3);
+    expect(res.endCursor).toBe('r2');
+  });
+
+  it('reports hasNextPage=true and trims the extra row', async () => {
+    const { res } = await run(6, 5);
+    expect(res.hasNextPage).toBe(true);
+    expect(res.nodes).toHaveLength(5);
   });
 });
 

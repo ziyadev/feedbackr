@@ -1,2 +1,2 @@
--- CreateIndex
-CREATE INDEX "Feedback_workspaceId_createdAt_idx" ON "Feedback"("workspaceId", "createdAt");
+-- Single statement, no transaction: CONCURRENTLY cannot run inside one.
+CREATE INDEX CONCURRENTLY "Feedback_workspaceId_createdAt_id_idx" ON "Feedback"("workspaceId", "createdAt", "id");
