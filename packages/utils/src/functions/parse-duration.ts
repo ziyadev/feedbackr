@@ -7,7 +7,7 @@ const UNIT_MS: Record<string, number> = {
   w: 604_800_000,
 };
 
-const PART = /^\s*(-?)(\d+(?:\.\d+)?|\.\d+)\s*([a-zA-Z]*)/;
+const PART = /^\s*([-+]?)\s*(\d+(?:\.\d+)?|\.\d+)\s*([a-zA-Z]*)/;
 
 /** Parses a duration like '1h30m' or '1.5h' into milliseconds; throws RangeError on invalid input. */
 export const parseDuration = (input: string): number => {
@@ -29,6 +29,11 @@ export const parseDuration = (input: string): number => {
     if (sign) {
       throw new RangeError(`Negative durations are not allowed: "${input}"`);
     }
+    if (unit === '') {
+      throw new RangeError(
+        `Missing unit after "${value}" in duration "${input}"`
+      );
+    }
     if (!Object.prototype.hasOwnProperty.call(UNIT_MS, unit)) {
       throw new RangeError(
         `Unknown unit "${unit}" in duration "${input}" (expected ms, s, m, h, d or w)`
@@ -43,5 +48,10 @@ export const parseDuration = (input: string): number => {
     rest = rest.slice(whole.length);
   }
 
-  return total;
+  const result = Math.round(total);
+  if (!Number.isFinite(result)) {
+    throw new RangeError(`Duration "${input}" is too large`);
+  }
+
+  return result;
 };

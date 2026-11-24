@@ -13,6 +13,8 @@ describe('parseDuration', () => {
     ['  1h   30m  ', 5_400_000],
     ['1 h', 3_600_000],
     ['1d2h3m4s5ms', 93_784_005],
+    ['0s', 0],
+    ['1ms', 1],
   ])('parses %p as %p ms', (input, expected) => {
     expect(parseDuration(input)).toBe(expected);
   });
@@ -20,6 +22,9 @@ describe('parseDuration', () => {
   it.each([
     ['1.5h', 5_400_000],
     ['0.5s', 500],
+    ['.5h', 1_800_000],
+    ['0.5ms', 1],
+    ['0.4ms', 0],
     ['1.5h 30s', 5_430_000],
   ])('supports decimals: %p', (input, expected) => {
     expect(parseDuration(input)).toBe(expected);
@@ -41,9 +46,18 @@ describe('parseDuration', () => {
     }
   );
 
-  it('throws a RangeError for a number without a unit', () => {
-    expect(() => parseDuration('30')).toThrow(RangeError);
-    expect(() => parseDuration('1h 30')).toThrow(RangeError);
+  it.each(['30', '1h30', '1h 30', '5.h'])(
+    'throws a missing-unit RangeError for %p',
+    (input) => {
+      expect(() => parseDuration(input)).toThrow(RangeError);
+      expect(() => parseDuration(input)).toThrow(/missing unit/i);
+    }
+  );
+
+  it('throws a RangeError when the result is not finite', () => {
+    const input = `${'9'.repeat(400)}w`;
+    expect(() => parseDuration(input)).toThrow(RangeError);
+    expect(() => parseDuration(input)).toThrow(/too large/i);
   });
 
   it.each(['1h 2h', '1h30m5m', '1s1s'])(
@@ -54,7 +68,7 @@ describe('parseDuration', () => {
     }
   );
 
-  it.each(['-5s', '1h -30m'])(
+  it.each(['-5s', '1h -30m', '- 5s', '+5s'])(
     'throws a RangeError for negative numbers in %p',
     (input) => {
       expect(() => parseDuration(input)).toThrow(RangeError);
