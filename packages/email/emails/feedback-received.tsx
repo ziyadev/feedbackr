@@ -47,9 +47,10 @@ export const FeedbackReceivedEmail = ({
           style={logo}
         />
         <Heading style={heading}>New feedback for {workspaceName}</Heading>
-        {rating !== undefined && (
-          <Text style={stars}>{toStars(rating)}</Text>
-        )}
+        {rating != null &&
+          Number.isFinite(rating) &&
+          rating >= 1 &&
+          rating <= MAX_RATING && <Text style={stars}>{toStars(rating)}</Text>}
         <Text style={paragraph}>{comment}</Text>
         <Section style={buttonContainer}>
           <Button style={button} href={dashboardUrl}>
