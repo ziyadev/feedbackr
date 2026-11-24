@@ -5,7 +5,7 @@ import { WorkspaceStrategy } from '../auth/strategies/workspace.strategy';
 import { WorkspaceMemberRole } from '../workspace/model/workspace-member.model';
 
 jest.mock('@repo/utils', () => ({ HOST_NAME: 'localhost' }), { virtual: true });
-import { NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { FeedbackService } from './feedback.service';
 import { CursorService } from '@/common/modules/cursor/cursor.service';
 
@@ -207,6 +207,54 @@ describe('FeedbackService.handleCreateFeedback', () => {
     });
     expect(result.id).toBe('f1');
     expect(result.metadata).toEqual([]);
+  });
+});
+
+describe('FeedbackService.handleCreateFeedback comment normalization', () => {
+  const run = (comment: string) => {
+    const create = jest.fn().mockResolvedValue({
+      id: 'f1',
+      workspaceId: 'w1',
+      metadata: '{}',
+      userMetadata: '{}',
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    const service = new FeedbackService({ create } as any, {} as any);
+    const promise = service.handleCreateFeedback({
+      workspaceId: 'w1',
+      comment,
+      rating: 5,
+      type: 'bug' as any,
+      pageUrl: 'https://x.test/a',
+    });
+    return { create, promise };
+  };
+  const saved = (create: jest.Mock) => create.mock.calls[0][0].data.comment;
+
+  it('leaves normal text unchanged', async () => {
+    const { create, promise } = run('works fine');
+    await promise;
+    expect(saved(create)).toBe('works fine');
+  });
+
+  it('trims leading and trailing whitespace', async () => {
+    const { create, promise } = run('  \n hello\t ');
+    await promise;
+    expect(saved(create)).toBe('hello');
+  });
+
+  it('collapses internal whitespace runs into a single space', async () => {
+    const { create, promise } = run('a  b\t\tc\n\n d');
+    await promise;
+    expect(saved(create)).toBe('a b c d');
+  });
+
+  it('rejects a comment that is empty after trimming', async () => {
+    const { create, promise } = run(' \t\n ');
+    await expect(promise).rejects.toThrow(BadRequestException);
+    await expect(promise).rejects.toThrow('Comment must not be empty');
+    expect(create).not.toHaveBeenCalled();
   });
 });
 
