@@ -6,6 +6,12 @@ describe('snakeCase', () => {
     expect(snakeCase('FooBar')).toBe('foo_bar');
   });
 
+  it('splits consecutive capitals (acronyms)', () => {
+    expect(snakeCase('XMLHttpRequest')).toBe('xml_http_request');
+    expect(snakeCase('getHTTPResponse')).toBe('get_http_response');
+    expect(snakeCase('parseURL')).toBe('parse_url');
+  });
+
   it('converts kebab-case, spaces and underscores', () => {
     expect(snakeCase('foo-bar')).toBe('foo_bar');
     expect(snakeCase('foo bar')).toBe('foo_bar');
