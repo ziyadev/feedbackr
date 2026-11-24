@@ -8,7 +8,7 @@ export const timeAgo = (
     withAgo?: boolean;
   } = {}
 ): string => {
-  if (!timestamp) return 'Never';
+  if (!timestamp || isNaN(new Date(timestamp).getTime())) return 'Never';
   const diff = Date.now() - new Date(timestamp).getTime();
   if (diff < 1000) {
     // less than 1 second
