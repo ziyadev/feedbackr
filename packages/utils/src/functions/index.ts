@@ -11,6 +11,7 @@ export * from './fetch-with-timeout';
 export * from './hash-string';
 export * from './nanoid';
 export * from './normalize-string';
+export * from './parse-duration';
 export * from './pluralize';
 export * from './random-value';
 export * from './resize-image';
