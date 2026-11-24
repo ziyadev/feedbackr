@@ -1,3 +1,5 @@
+const UNCOUNTABLE = new Set(['sheep', 'fish', 'series', 'species', 'deer']);
+
 const endsWithConsonantY = (word: string) => /[^aeiou]y$/i.test(word);
 
 export const pluralize = (
@@ -11,8 +13,14 @@ export const pluralize = (
     return word;
   }
 
-  if (options.plural) {
+  if (options.plural !== undefined && options.plural !== '') {
+    // Explicit plural always wins, even for words we would otherwise inflect.
     return options.plural;
+  }
+
+  // Uncountable nouns never change.
+  if (UNCOUNTABLE.has(word.toLowerCase())) {
+    return word;
   }
 
   // city -> cities, but day -> days
