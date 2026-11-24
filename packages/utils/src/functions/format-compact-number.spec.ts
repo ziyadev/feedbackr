@@ -13,6 +13,13 @@ describe('formatCompactNumber', () => {
     [-1500, '-1.5k'],
     [-999, '-999'],
     [-0, '0'],
+    [12.345, '12.3'],
+    [999.96, '1k'],
+    [1e12, '1000B'],
+    [2.5e12, '2500B'],
+    [Infinity, 'Infinity'],
+    [-Infinity, '-Infinity'],
+    [NaN, 'NaN'],
   ])('formats %p as %p', (value, expected) => {
     expect(formatCompactNumber(value)).toBe(expected);
   });
@@ -25,7 +32,7 @@ describe('formatCompactNumber', () => {
   it.each([-1, 4, 1.5, NaN])('throws a RangeError for decimals %p', (decimals) => {
     expect(() => formatCompactNumber(1000, { decimals })).toThrow(RangeError);
     expect(() => formatCompactNumber(1000, { decimals })).toThrow(
-      new RegExp(`${decimals}.*0.*3`),
+      `Invalid decimals value ${decimals}: must be an integer between 0 and 3 inclusive`,
     );
   });
 });

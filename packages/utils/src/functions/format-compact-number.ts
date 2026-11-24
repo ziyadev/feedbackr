@@ -16,6 +16,9 @@ const UNITS = [
  * scale are promoted ("999999" -> "1M"). Implemented by hand rather than with
  * `Intl.NumberFormat` compact notation, whose output varies across runtimes.
  *
+ * Promotion stops at `B`: there is no trillion unit, so 1e12 prints "1000B".
+ * Non-finite values are returned as `String(value)` ("Infinity", "NaN").
+ *
  * @throws RangeError if `decimals` is not an integer from 0 to 3.
  */
 export function formatCompactNumber(
