@@ -8,6 +8,7 @@ export * from './currency-formatter';
 export * from './datetime';
 export * from './deep-equal';
 export * from './fetch-with-timeout';
+export * from './format-compact-number';
 export * from './hash-string';
 export * from './nanoid';
 export * from './normalize-string';
