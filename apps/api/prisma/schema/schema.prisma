@@ -65,10 +65,16 @@ model Session {
   @@index([userId])
 }
 
+enum VerificationTokenType {
+  RESET_PASSWORD
+  LOGIN
+}
+
 model VerificationToken {
   identifier String
   token      String
   expires    DateTime
+  type       VerificationTokenType @default(RESET_PASSWORD)
 
   @@id([identifier, token])
 }
