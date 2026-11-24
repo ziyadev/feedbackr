@@ -23,8 +23,13 @@ describe('normalizeString', () => {
     expect(normalizeString('a\r\nb')).toBe('a b');
   });
 
+  it('treats vertical tab and form feed as word separators', () => {
+    expect(normalizeString('a\x0bb')).toBe('a b');
+    expect(normalizeString('a\x0cb')).toBe('a b');
+  });
+
   it('removes a leading BOM', () => {
-    expect(normalizeString('﻿Hello')).toBe('hello');
+    expect(normalizeString('\uFEFFHello')).toBe('hello');
   });
 
   it('removes non-printable control characters', () => {
@@ -40,7 +45,7 @@ describe('normalizeString', () => {
   });
 
   it('is idempotent', () => {
-    const once = normalizeString(' ﻿Foo\t Bar ');
+    const once = normalizeString(' \uFEFFFoo\t Bar ');
     expect(normalizeString(once)).toBe(once);
   });
 });
