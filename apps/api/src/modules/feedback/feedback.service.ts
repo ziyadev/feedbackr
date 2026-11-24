@@ -1,5 +1,6 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { FeedbackRepository } from '../database/repositories/feedback.repository';
+import { WorkspaceMemberRepository } from '../database/repositories/workspace-member.repository';
 import { FeedbackModel, PaginatedFeedbackModel } from './models/feedback.model';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { UpdateFeedbackDto } from './dto/update-feedback.dto';
@@ -23,7 +24,8 @@ export class FeedbackService {
   private logger = new Logger(FeedbackService.name);
   constructor(
     private readonly feedbackRepository: FeedbackRepository,
-    private cursorService: CursorService
+    private cursorService: CursorService,
+    private readonly workspaceMemberRepository: WorkspaceMemberRepository
   ) {}
 
   async handleGetAllFeedbacks(
@@ -86,6 +88,12 @@ export class FeedbackService {
     });
     if (!existing) throw new NotFoundException('Feedback not found');
     const { status, priority, assignedToId } = input;
+    if (assignedToId) {
+      const member = await this.workspaceMemberRepository.findFirst({
+        where: { id: assignedToId, workspaceId },
+      });
+      if (!member) throw new NotFoundException('Assignee not found');
+    }
     const feedback = await this.feedbackRepository.update({
       where: { id },
       data: { status, priority, assignedToId },
