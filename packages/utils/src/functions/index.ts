@@ -16,6 +16,7 @@ export * from './pluralize';
 export * from './random-value';
 export * from './resize-image';
 export * from './smart-truncate';
+export * from './snake-case';
 export * from './stable-sort';
 export * from './time-ago';
 export * from './trim';
