@@ -14,7 +14,7 @@ export const normalizeString = (key: string) => {
     .replace(/^\u2029/, '')
     // Remove any non-printable characters
     // eslint-disable-next-line no-control-regex
-    .replace(/[\x00-\x1F\x7F-\x9F]/g, '')
+    .replace(/[\x00-\x08\x0E-\x1F\x7F-\x9F]/g, '')
     // Normalize whitespace
     .replace(/\s+/g, ' ')
     .trim()
