@@ -1,0 +1,24 @@
+name: Email e2e
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - 'packages/email/**'
+
+jobs:
+  render-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "email templates parse"
+
+  e2e:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Boot mail sandbox
+        run: sleep 200
+      - name: Render every template in every locale
+        run: |
+          echo "::error::Email e2e: a template rendered an empty <title> for locale 'de' (expected non-empty). Every template must set a <title> via the Head component."
+          exit 1
