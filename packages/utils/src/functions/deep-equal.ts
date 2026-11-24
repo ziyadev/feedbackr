@@ -17,6 +17,8 @@ export const deepEqual: DeepEqual = (obj1, obj2) => {
     return false;
   }
 
+  // Intentional: values with different prototypes (e.g. Object.create(null) vs {},
+  // class instance vs plain object) are never equal.
   if (Object.getPrototypeOf(obj1) !== Object.getPrototypeOf(obj2)) {
     return false;
   }
@@ -27,12 +29,16 @@ export const deepEqual: DeepEqual = (obj1, obj2) => {
   }
 
   if (obj1 instanceof Set) {
-    const set2 = obj2 as Set<any>;
+    // Pair items one-to-one so the result is symmetric.
+    const remaining = [...(obj2 as Set<any>)];
     return (
-      obj1.size === set2.size &&
-      [...obj1].every(
-        (a) => set2.has(a) || [...set2].some((b) => deepEqual(a, b))
-      )
+      obj1.size === remaining.length &&
+      [...obj1].every((a) => {
+        const i = remaining.findIndex((b) => deepEqual(a, b));
+        if (i === -1) return false;
+        remaining.splice(i, 1);
+        return true;
+      })
     );
   }
 
