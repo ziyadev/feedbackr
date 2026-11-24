@@ -1,3 +1,4 @@
+import { NotFoundException } from '@nestjs/common';
 import { FeedbackService } from './feedback.service';
 import { CursorService } from '@/common/modules/cursor/cursor.service';
 
@@ -122,5 +123,57 @@ describe('FeedbackService.handleCreateFeedback', () => {
     });
     expect(result.id).toBe('f1');
     expect(result.metadata).toEqual([]);
+  });
+});
+
+describe('FeedbackService.handleUpdateFeedback', () => {
+  const row = {
+    id: 'f1',
+    workspaceId: 'w1',
+    status: 'closed',
+    priority: 'high',
+    assignedToId: 'm1',
+    metadata: '{}',
+    userMetadata: '{}',
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  it('updates status, priority and assignee in the caller workspace', async () => {
+    const findFirst = jest.fn().mockResolvedValue(row);
+    const update = jest.fn().mockResolvedValue(row);
+    const service = new FeedbackService(
+      { findFirst, update } as any,
+      new CursorService()
+    );
+
+    const result = await service.handleUpdateFeedback('w1', 'f1', {
+      status: 'closed',
+      priority: 'high',
+      assignedToId: 'm1',
+    } as any);
+
+    expect(findFirst).toHaveBeenCalledWith({
+      where: { id: 'f1', workspaceId: 'w1' },
+    });
+    expect(update).toHaveBeenCalledWith({
+      where: { id: 'f1' },
+      data: { status: 'closed', priority: 'high', assignedToId: 'm1' },
+    });
+    expect(result.status).toBe('closed');
+  });
+
+  it('rejects feedback from another workspace without updating', async () => {
+    const findFirst = jest.fn().mockResolvedValue(null);
+    const update = jest.fn();
+    const service = new FeedbackService(
+      { findFirst, update } as any,
+      new CursorService()
+    );
+
+    await expect(
+      service.handleUpdateFeedback('w2', 'f1', { status: 'closed' } as any)
+    ).rejects.toThrow(NotFoundException);
+    expect(update).not.toHaveBeenCalled();
   });
 });

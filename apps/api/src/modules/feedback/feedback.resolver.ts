@@ -1,5 +1,6 @@
-import { Args, Resolver, Query } from '@nestjs/graphql';
+import { Args, ID, Mutation, Resolver, Query } from '@nestjs/graphql';
 import { FeedbackModel, PaginatedFeedbackModel } from './models/feedback.model';
+import { UpdateFeedbackDto } from './dto/update-feedback.dto';
 import { FeedbackService } from './feedback.service';
 import { Workspace } from '@/common/decorators/workspace.decorator';
 import { WorkspaceSessionData } from '@/common/config/sessoin.config';
@@ -37,5 +38,17 @@ export class FeedbackResolver {
       pagination,
       orderBy
     );
+  }
+
+  @WorkspaceAuth({
+    roles: [WorkspaceMemberRole.ADMIN, WorkspaceMemberRole.EDITOR],
+  })
+  @Mutation(() => FeedbackModel)
+  updateFeedback(
+    @Workspace() workspace: WorkspaceSessionData,
+    @Args('id', { type: () => ID }) id: string,
+    @Args('input') input: UpdateFeedbackDto
+  ) {
+    return this.feedbackService.handleUpdateFeedback(workspace.id, id, input);
   }
 }
