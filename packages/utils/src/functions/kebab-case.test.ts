@@ -17,6 +17,11 @@ describe('kebabCase', () => {
     expect(kebabCase('  foo__bar--baz  ')).toBe('foo-bar-baz');
   });
 
+  it('splits consecutive capitals (acronyms)', () => {
+    expect(kebabCase('XMLHttpRequest')).toBe('xml-http-request');
+    expect(kebabCase('getHTTPResponse')).toBe('get-http-response');
+  });
+
   it('returns an empty string for empty input', () => {
     expect(kebabCase('')).toBe('');
   });
