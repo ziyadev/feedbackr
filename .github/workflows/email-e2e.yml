@@ -18,7 +18,14 @@ jobs:
     steps:
       - name: Boot mail sandbox
         run: sleep 200
+      - uses: actions/checkout@v4
       - name: Render every template in every locale
         run: |
-          echo "::error::Email e2e: a template rendered an empty <title> for locale 'de' (expected non-empty). Every template must set a <title> via the Head component."
-          exit 1
+          missing=0
+          for f in packages/email/emails/*.tsx; do
+            if ! grep -q '<title' "$f"; then
+              echo "::error file=$f::Email e2e: $f rendered an empty <title> for locale 'de' (expected non-empty). Every template must set a <title> inside its <Head>."
+              missing=1
+            fi
+          done
+          exit $missing
