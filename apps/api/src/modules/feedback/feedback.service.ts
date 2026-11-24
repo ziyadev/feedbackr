@@ -1,7 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { FeedbackRepository } from '../database/repositories/feedback.repository';
+import { WorkspaceMemberRepository } from '../database/repositories/workspace-member.repository';
 import { FeedbackModel, PaginatedFeedbackModel } from './models/feedback.model';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
+import { UpdateFeedbackDto } from './dto/update-feedback.dto';
 import {
   FeedbackPaginationDto,
   GetAllFeedbacksFilterDto,
@@ -22,7 +24,8 @@ export class FeedbackService {
   private logger = new Logger(FeedbackService.name);
   constructor(
     private readonly feedbackRepository: FeedbackRepository,
-    private cursorService: CursorService
+    private cursorService: CursorService,
+    private readonly workspaceMemberRepository: WorkspaceMemberRepository
   ) {}
 
   async handleGetAllFeedbacks(
@@ -71,6 +74,29 @@ export class FeedbackService {
         metadata: JSON.stringify({}),
         userMetadata: JSON.stringify({}),
       },
+    });
+    return FeedbackMapper.toModel(feedback);
+  }
+
+  async handleUpdateFeedback(
+    workspaceId: string,
+    id: string,
+    input: UpdateFeedbackDto
+  ): Promise<FeedbackModel> {
+    const existing = await this.feedbackRepository.findFirst({
+      where: { id, workspaceId },
+    });
+    if (!existing) throw new NotFoundException('Feedback not found');
+    const { status, priority, assignedToId } = input;
+    if (assignedToId) {
+      const member = await this.workspaceMemberRepository.findFirst({
+        where: { id: assignedToId, workspaceId },
+      });
+      if (!member) throw new NotFoundException('Assignee not found');
+    }
+    const feedback = await this.feedbackRepository.update({
+      where: { id },
+      data: { status, priority, assignedToId },
     });
     return FeedbackMapper.toModel(feedback);
   }
