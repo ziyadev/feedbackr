@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { FeedbackRepository } from '../database/repositories/feedback.repository';
 import { WorkspaceMemberRepository } from '../database/repositories/workspace-member.repository';
 import { FeedbackModel, PaginatedFeedbackModel } from './models/feedback.model';
@@ -62,7 +67,9 @@ export class FeedbackService {
   }
 
   async handleCreateFeedback(input: CreateFeedbackDto): Promise<FeedbackModel> {
-    const { workspaceId, comment, rating, type, pageUrl, country } = input;
+    const { workspaceId, rating, type, pageUrl, country } = input;
+    const comment = input.comment.replace(/\s+/g, ' ').trim();
+    if (!comment) throw new BadRequestException('Comment must not be empty');
     const feedback = await this.feedbackRepository.create({
       data: {
         workspaceId,

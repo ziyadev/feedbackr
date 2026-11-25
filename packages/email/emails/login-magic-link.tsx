@@ -18,7 +18,9 @@ interface LoginMagicLinkEmailProps {
 
 export const LoginMagicLinkEmail = ({ url }: LoginMagicLinkEmailProps) => (
   <Html>
-    <Head />
+    <Head>
+      <title>Your magic link</title>
+    </Head>
     <Preview>Your login link for Feedbacker</Preview>
     <Body style={main}>
       <Container style={container}>
