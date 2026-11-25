@@ -23,6 +23,11 @@ describe('clamp', () => {
   });
 
   it('throws when min is greater than max', () => {
-    expect(() => clamp(5, 10, 0)).toThrow();
+    expect(() => clamp(5, 10, 0)).toThrow(RangeError);
+  });
+
+  it('throws when a bound is NaN', () => {
+    expect(() => clamp(5, NaN, 1)).toThrow(RangeError);
+    expect(() => clamp(5, 1, NaN)).toThrow(RangeError);
   });
 });
