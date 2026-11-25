@@ -285,7 +285,7 @@ export class AuthService {
   }
   /* handle change passowrd */
   async handlechangePassword(dto: ChangePasswordDto): Promise<boolean> {
-    const userId = await this.tokenService.getIdentifierByToken(dto.token);
+    const userId = await this.tokenService.consumeResetPasswordToken(dto.token);
     if (!userId) return false;
     const user = await this.userService.findById({ id: userId });
     if (!user) return false;

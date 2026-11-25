@@ -17,6 +17,7 @@ export class TokenService {
             data: {
               identifier: userId,
               token,
+              type: 'LOGIN',
               expires: new Date(Date.now() + 1000 * 60 * 10), // 10 minutes
             },
           });
@@ -48,6 +49,7 @@ export class TokenService {
             data: {
               identifier: userId,
               token,
+              type: 'RESET_PASSWORD',
               expires: new Date(Date.now() + 1000 * 60 * 5), // 5 minutes
             },
           });
@@ -61,6 +63,7 @@ export class TokenService {
         const findToken = await this.tokenRepository.findFirst({
           where: {
             token,
+            type: 'RESET_PASSWORD',
           },
         });
         if (!findToken || findToken.expires < new Date()) {
@@ -70,12 +73,15 @@ export class TokenService {
       },
     };
   }
-  async getIdentifierByToken(token: string): Promise<string | null> {
-    const _token = await this.tokenRepository.findFirst({
-      where: {
-        token,
-      },
+  /** Single-use: returns the user id for a valid, unexpired reset token and deletes it. */
+  async consumeResetPasswordToken(token: string): Promise<string | null> {
+    const found = await this.tokenRepository.findFirst({
+      where: { token, type: 'RESET_PASSWORD' },
     });
-    return _token ? _token.identifier : null;
+    if (!found || found.expires < new Date()) return null;
+    const { count } = await this.tokenRepository.deleteMany({
+      where: { token, type: 'RESET_PASSWORD' },
+    });
+    return count === 1 ? found.identifier : null;
   }
 }
