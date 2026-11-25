@@ -15,6 +15,16 @@ describe('isBlank', () => {
     expect(isBlank('\t\n\r ')).toBe(true);
   });
 
+  it('treats NBSP as whitespace (stripped by trim)', () => {
+    expect(isBlank('\u00A0')).toBe(true);
+    expect(isBlank(' \u00A0 ')).toBe(true);
+  });
+
+  it('does not treat zero-width space as whitespace (not stripped by trim)', () => {
+    expect(isBlank('\u200B')).toBe(false);
+    expect(isBlank(' \u200B ')).toBe(false);
+  });
+
   it('returns false for strings with content', () => {
     expect(isBlank('a')).toBe(false);
     expect(isBlank('  a  ')).toBe(false);
