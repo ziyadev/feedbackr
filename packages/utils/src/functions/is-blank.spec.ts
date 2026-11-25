@@ -13,7 +13,10 @@ describe('isBlank', () => {
   it('returns true for whitespace-only strings', () => {
     expect(isBlank('   ')).toBe(true);
     expect(isBlank(' \t\n\r ')).toBe(true);
-    expect(isBlank('  ')).toBe(true);
+  });
+
+  it('returns true for non-breaking and em spaces', () => {
+    expect(isBlank(' \u00a0\u2003 ')).toBe(true);
   });
 
   it('returns false for strings with content', () => {
