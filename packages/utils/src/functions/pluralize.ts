@@ -2,6 +2,13 @@ const UNCOUNTABLE = new Set(['sheep', 'fish', 'series', 'species', 'deer']);
 
 const endsWithConsonantY = (word: string) => /[^aeiou]y$/i.test(word);
 
+/**
+ * Pluralize an English noun for a given count.
+ *
+ * @param word - singular noun
+ * @param count - how many; 1 keeps the singular
+ * @param options.plural - override for irregular nouns
+ */
 export const pluralize = (
   word: string,
   count: number,
