@@ -1,6 +1,7 @@
 export * from './camel-case';
 export * from './capitalize';
 export * from './chunk';
+export * from './clamp';
 export * from './cn';
 export * from './combine-words';
 export * from './construct-metadata';

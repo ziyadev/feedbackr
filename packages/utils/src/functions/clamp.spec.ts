@@ -1,0 +1,28 @@
+import { clamp } from './clamp';
+
+describe('clamp', () => {
+  it('returns the value when within range', () => {
+    expect(clamp(5, 0, 10)).toBe(5);
+  });
+
+  it('returns min when value is below range', () => {
+    expect(clamp(-5, 0, 10)).toBe(0);
+  });
+
+  it('returns max when value is above range', () => {
+    expect(clamp(15, 0, 10)).toBe(10);
+  });
+
+  it('returns the bounds when value equals them', () => {
+    expect(clamp(0, 0, 10)).toBe(0);
+    expect(clamp(10, 0, 10)).toBe(10);
+  });
+
+  it('works when min equals max', () => {
+    expect(clamp(7, 3, 3)).toBe(3);
+  });
+
+  it('throws when min is greater than max', () => {
+    expect(() => clamp(5, 10, 0)).toThrow();
+  });
+});
