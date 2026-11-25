@@ -82,7 +82,7 @@ export class AuthService {
       }
       // Create a new user if not found
       const newUser = await this.userService.createWithProvider({
-        email: dto.email,
+        email: normalizedEmail,
         name: dto.name,
         avatar: dto.avatar_url,
         provider: dto.provider,
@@ -181,27 +181,30 @@ export class AuthService {
     dto: CredentialsSignUpDto,
     session: SessionData
   ): Promise<CredentialsSignUpModel> {
+    const errors = new CredentialsSignUpErrorBuilder();
+    const SIGNUP_DELAY = {
+      MIN: 100,
+      MAX: 4000,
+    };
+    const userExistsResult = async () => {
+      const randomDelay = Math.floor(
+        Math.random() * (SIGNUP_DELAY.MAX - SIGNUP_DELAY.MIN) +
+          SIGNUP_DELAY.MIN
+      );
+      await new Promise((resolve) => setTimeout(resolve, randomDelay));
+      errors.setUserExsitsError();
+      return MutateResultFactory.err({
+        user: null,
+        errors: errors.build(),
+      });
+    };
     try {
-      const errors = new CredentialsSignUpErrorBuilder();
       const userExists = await this.userService.findByEmail({
         email: normalizeString(dto.email),
       });
-      const SIGNUP_DELAY = {
-        MIN: 100,
-        MAX: 4000,
-      };
       /* if user exists */
       if (userExists) {
-        const randomDelay = Math.floor(
-          Math.random() * (SIGNUP_DELAY.MAX - SIGNUP_DELAY.MIN) +
-            SIGNUP_DELAY.MIN
-        );
-        await new Promise((resolve) => setTimeout(resolve, randomDelay));
-        errors.setUserExsitsError();
-        return MutateResultFactory.err({
-          user: null,
-          errors: errors.build(),
-        });
+        return userExistsResult();
       }
       const hashedPassword = await passwordHash(dto.password);
       const user = new UserBuilder()
@@ -216,6 +219,10 @@ export class AuthService {
         user: UserMapper.toModel(newUser),
       });
     } catch (e) {
+      // concurrent sign-up lost the race on the unique email index
+      if ((e as { code?: string })?.code === 'P2002') {
+        return userExistsResult();
+      }
       this.logger.error(e);
       throw new InternalServerErrorException(
         'Something went wrong, please try again later.'

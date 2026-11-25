@@ -1,12 +1,15 @@
--- Fail loudly if duplicate (case/whitespace-insensitive) emails already exist.
+-- Normalize existing emails (matches normalizeString in the app).
+UPDATE "User" SET "email" = lower(btrim("email"));
+
+-- Fail loudly if duplicate emails remain after normalization.
 DO $$
 DECLARE
   dup_count integer;
 BEGIN
   SELECT count(*) INTO dup_count FROM (
-    SELECT lower(btrim("email"))
+    SELECT "email"
     FROM "User"
-    GROUP BY lower(btrim("email"))
+    GROUP BY "email"
     HAVING count(*) > 1
   ) d;
   IF dup_count > 0 THEN
