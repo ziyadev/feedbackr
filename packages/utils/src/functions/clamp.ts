@@ -7,3 +7,7 @@ export const clamp = (value: number, min: number, max: number): number => {
   }
   return Math.min(Math.max(value, min), max);
 };
+
+/** Clamps `value` to [min, max] and rounds to the nearest integer; same guards as `clamp`. */
+export const clampInt = (value: number, min: number, max: number): number =>
+  Math.round(clamp(value, min, max));
