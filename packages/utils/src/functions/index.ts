@@ -10,6 +10,7 @@ export * from './datetime';
 export * from './deep-equal';
 export * from './fetch-with-timeout';
 export * from './hash-string';
+export * from './is-blank';
 export * from './kebab-case';
 export * from './nanoid';
 export * from './normalize-string';
