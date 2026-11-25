@@ -31,6 +31,7 @@ export class TokenService {
         const findToken = await this.tokenRepository.findFirst({
           where: {
             token,
+            type: 'LOGIN',
           },
         });
         if (!findToken || findToken.expires < new Date()) {

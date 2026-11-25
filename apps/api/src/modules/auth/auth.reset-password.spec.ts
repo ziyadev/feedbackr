@@ -95,4 +95,12 @@ describe('AuthService.handlechangePassword', () => {
     ).resolves.toBe(false);
     expect(userService.update).not.toHaveBeenCalled();
   });
+
+  it('rejects a reset token in the login validate', async () => {
+    const { tokenService } = setup();
+    const token = await tokenService.userResetPasswordToken.generate('u1');
+    await expect(tokenService.userLoginToken.validate(token)).resolves.toBe(
+      false
+    );
+  });
 });
