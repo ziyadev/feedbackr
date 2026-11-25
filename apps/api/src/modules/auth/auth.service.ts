@@ -205,7 +205,7 @@ export class AuthService {
       }
       const hashedPassword = await passwordHash(dto.password);
       const user = new UserBuilder()
-        .setEmail(dto.email)
+        .setEmail(normalizeString(dto.email))
         .setName(dto.name)
         .setPassword(hashedPassword)
         .build();

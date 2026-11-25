@@ -12,7 +12,7 @@ generator client {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String
+  email         String    @unique
   emailVerified Boolean   @default(false)
   avatar        String?
   lockedAt      DateTime?
